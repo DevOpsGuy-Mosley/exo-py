@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Démographie Abidjan - Analyse NumPy</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <!-- En-tête -->
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-gray-800 mb-2">🏙️ Démographie Abidjan</h1>
+            <p class="text-gray-600">Analyse des données démographiques des communes d'Abidjan avec NumPy</p>
+        </div>
+
+        <!-- Boutons d'action -->
+        <div class="flex justify-center gap-4 mb-8 flex-wrap">
+            <button id="btnDonneesAbidjan" class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-6 rounded-lg transition-colors">
+                📊 Données Communes
+            </button>
+            <button id="btnAnalyseDemographique" class="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-6 rounded-lg transition-colors">
+                👥 Analyse Démographique
+            </button>
+            <button id="btnComparaison" class="bg-purple-500 hover:bg-purple-600 text-white font-semibold py-2 px-6 rounded-lg transition-colors">
+                📈 Comparaison Communes
+            </button>
+        </div>
+
+        <!-- Section Données Communes -->
+        <div id="sectionDonneesAbidjan" class="hidden mb-8">
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4">🏘️ Données des Communes d'Abidjan</h2>
+                
+                <!-- Statistiques globales -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+                    <div class="bg-blue-50 p-4 rounded-lg">
+                        <h3 class="font-semibold text-blue-800">Population Totale</h3>
+                        <p id="populationTotale" class="text-2xl font-bold text-blue-600">-</p>
+                    </div>
+                    <div class="bg-green-50 p-4 rounded-lg">
+                        <h3 class="font-semibold text-green-800">Nombre de Communes</h3>
+                        <p id="nombreCommunes" class="text-2xl font-bold text-green-600">-</p>
+                    </div>
+                    <div class="bg-purple-50 p-4 rounded-lg">
+                        <h3 class="font-semibold text-purple-800">Densité Moyenne</h3>
+                        <p id="densiteMoyenne" class="text-2xl font-bold text-purple-600">-</p>
+                    </div>
+                </div>
+
+                <!-- Tableau des communes -->
+                <div class="overflow-x-auto">
+                    <table class="w-full border-collapse border border-gray-300">
+                        <thead class="bg-gray-100">
+                            <tr>
+                                <th class="border border-gray-300 px-4 py-2 text-left">Commune</th>
+                                <th class="border border-gray-300 px-4 py-2 text-right">Population</th>
+                                <th class="border border-gray-300 px-4 py-2 text-right">Densité (hab/km²)</th>
+                                <th class="border border-gray-300 px-4 py-2 text-right">Superficie (km²)</th>
+                                <th class="border border-gray-300 px-4 py-2 text-center">Répartition par âge</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableauCommunes">
+                            <!-- Rempli dynamiquement -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section Analyse Démographique -->
+        <div id="sectionAnalyseDemographique" class="hidden mb-8">
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4">👥 Analyse Démographique</h2>
+                
+                <!-- Répartition par âge -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                    <div class="bg-blue-50 p-4 rounded-lg">
+                        <h3 class="font-semibold text-blue-800 mb-4">Répartition par Âge</h3>
+                        <div class="space-y-3">
+                            <div class="flex justify-between items-center">
+                                <span class="text-blue-700">Jeunes (0-24 ans)</span>
+                                <span id="jeunesNombre" class="font-bold">-</span>
+                                <span id="jeunesPourcentage" class="text-blue-600">-</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-green-700">Adultes (25-64 ans)</span>
+                                <span id="adultesNombre" class="font-bold">-</span>
+                                <span id="adultesPourcentage" class="text-green-600">-</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-purple-700">Seniors (65+ ans)</span>
+                                <span id="seniorsNombre" class="font-bold">-</span>
+                                <span id="seniorsPourcentage" class="text-purple-600">-</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-green-50 p-4 rounded-lg">
+                        <h3 class="font-semibold text-green-800 mb-4">Densité de Population</h3>
+                        <div class="space-y-3">
+                            <div class="flex justify-between items-center">
+                                <span class="text-green-700">Moyenne</span>
+                                <span id="densiteMoyenneAnalyse" class="font-bold">-</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-green-700">Minimum</span>
+                                <span id="densiteMin" class="font-bold">-</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-green-700">Maximum</span>
+                                <span id="densiteMax" class="font-bold">-</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Graphique répartition par âge -->
+                <div class="w-full h-64">
+                    <canvas id="graphiqueRepartition"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section Comparaison -->
+        <div id="sectionComparaison" class="hidden">
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4">📈 Comparaison des Communes</h2>
+                
+                <!-- Classements -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                    <div class="bg-blue-50 p-4 rounded-lg">
+                        <h3 class="font-semibold text-blue-800 mb-4">Classement par Population</h3>
+                        <div id="classementPopulation" class="space-y-2">
+                            <!-- Rempli dynamiquement -->
+                        </div>
+                    </div>
+                    
+                    <div class="bg-green-50 p-4 rounded-lg">
+                        <h3 class="font-semibold text-green-800 mb-4">Classement par Densité</h3>
+                        <div id="classementDensite" class="space-y-2">
+                            <!-- Rempli dynamiquement -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Indices de développement -->
+                <div class="bg-purple-50 p-4 rounded-lg">
+                    <h3 class="font-semibold text-purple-800 mb-4">Indices de Développement</h3>
+                    <div id="indicesDeveloppement" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
+                        <!-- Rempli dynamiquement -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let chartRepartition = null;
+
+        // Gestionnaire pour les données d'Abidjan
+        document.getElementById('btnDonneesAbidjan').addEventListener('click', async () => {
+            try {
+                const response = await fetch('/api/donnees-abidjan');
+                const data = await response.json();
+                
+                // Afficher les statistiques globales
+                document.getElementById('populationTotale').textContent = data.statistiques_globales.population_totale.toLocaleString('fr-FR');
+                document.getElementById('nombreCommunes').textContent = data.statistiques_globales.nombre_communes;
+                document.getElementById('densiteMoyenne').textContent = data.statistiques_globales.densite_moyenne.toLocaleString('fr-FR');
+                
+                // Remplir le tableau des communes
+                const tbody = document.getElementById('tableauCommunes');
+                tbody.innerHTML = '';
+                
+                Object.entries(data.communes).forEach(([commune, info]) => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td class="border border-gray-300 px-4 py-2 font-semibold">${commune}</td>
+                        <td class="border border-gray-300 px-4 py-2 text-right">${info.population.toLocaleString('fr-FR')}</td>
+                        <td class="border border-gray-300 px-4 py-2 text-right">${info.densite.toLocaleString('fr-FR')}</td>
+                        <td class="border border-gray-300 px-4 py-2 text-right">${info.superficie}</td>
+                        <td class="border border-gray-300 px-4 py-2 text-center">
+                            <div class="text-xs">
+                                <div>Jeunes: ${info.repartition_age.jeunes.toLocaleString('fr-FR')}</div>
+                                <div>Adultes: ${info.repartition_age.adultes.toLocaleString('fr-FR')}</div>
+                                <div>Seniors: ${info.repartition_age.seniors.toLocaleString('fr-FR')}</div>
+                            </div>
+                        </td>
+                    `;
+                    tbody.appendChild(row);
+                });
+                
+                // Afficher la section
+                document.getElementById('sectionDonneesAbidjan').classList.remove('hidden');
+                
+            } catch (error) {
+                console.error('Erreur:', error);
+            }
+        });
+
+        // Gestionnaire pour l'analyse démographique
+        document.getElementById('btnAnalyseDemographique').addEventListener('click', async () => {
+            try {
+                const response = await fetch('/api/analyse-demographique');
+                const data = await response.json();
+                
+                // Afficher la répartition par âge
+                document.getElementById('jeunesNombre').textContent = data.repartition_age.jeunes.nombre.toLocaleString('fr-FR');
+                document.getElementById('jeunesPourcentage').textContent = `${data.repartition_age.jeunes.pourcentage}%`;
+                document.getElementById('adultesNombre').textContent = data.repartition_age.adultes.nombre.toLocaleString('fr-FR');
+                document.getElementById('adultesPourcentage').textContent = `${data.repartition_age.adultes.pourcentage}%`;
+                document.getElementById('seniorsNombre').textContent = data.repartition_age.seniors.nombre.toLocaleString('fr-FR');
+                document.getElementById('seniorsPourcentage').textContent = `${data.repartition_age.seniors.pourcentage}%`;
+                
+                // Afficher les statistiques de densité
+                document.getElementById('densiteMoyenneAnalyse').textContent = data.densite_population.moyenne.toLocaleString('fr-FR');
+                document.getElementById('densiteMin').textContent = data.densite_population.minimum.toLocaleString('fr-FR');
+                document.getElementById('densiteMax').textContent = data.densite_population.maximum.toLocaleString('fr-FR');
+                
+                // Créer le graphique de répartition
+                createRepartitionChart(data.repartition_age);
+                
+                // Afficher la section
+                document.getElementById('sectionAnalyseDemographique').classList.remove('hidden');
+                
+            } catch (error) {
+                console.error('Erreur:', error);
+            }
+        });
+
+        // Gestionnaire pour la comparaison
+        document.getElementById('btnComparaison').addEventListener('click', async () => {
+            try {
+                const response = await fetch('/api/comparaison-communes');
+                const data = await response.json();
+                
+                // Afficher le classement par population
+                const classementPop = document.getElementById('classementPopulation');
+                classementPop.innerHTML = '';
+                data.classement_population.forEach((item, index) => {
+                    const div = document.createElement('div');
+                    div.className = 'flex justify-between items-center p-2 bg-white rounded';
+                    div.innerHTML = `
+                        <span class="font-semibold">${index + 1}. ${item.commune}</span>
+                        <span class="text-blue-600 font-bold">${item.population.toLocaleString('fr-FR')}</span>
+                    `;
+                    classementPop.appendChild(div);
+                });
+                
+                // Afficher le classement par densité
+                const classementDensite = document.getElementById('classementDensite');
+                classementDensite.innerHTML = '';
+                data.classement_densite.forEach((item, index) => {
+                    const div = document.createElement('div');
+                    div.className = 'flex justify-between items-center p-2 bg-white rounded';
+                    div.innerHTML = `
+                        <span class="font-semibold">${index + 1}. ${item.commune}</span>
+                        <span class="text-green-600 font-bold">${item.densite.toLocaleString('fr-FR')}</span>
+                    `;
+                    classementDensite.appendChild(div);
+                });
+                
+                // Afficher les indices de développement
+                const indicesDiv = document.getElementById('indicesDeveloppement');
+                indicesDiv.innerHTML = '';
+                Object.entries(data.indices_developpement).forEach(([commune, indice]) => {
+                    const div = document.createElement('div');
+                    div.className = 'bg-white p-3 rounded text-center';
+                    div.innerHTML = `
+                        <div class="font-semibold text-sm">${commune}</div>
+                        <div class="text-lg font-bold text-purple-600">${indice}</div>
+                    `;
+                    indicesDiv.appendChild(div);
+                });
+                
+                // Afficher la section
+                document.getElementById('sectionComparaison').classList.remove('hidden');
+                
+            } catch (error) {
+                console.error('Erreur:', error);
+            }
+        });
+
+        // Fonction pour créer le graphique de répartition par âge
+        function createRepartitionChart(repartitionData) {
+            const ctx = document.getElementById('graphiqueRepartition').getContext('2d');
+            
+            // Détruire le graphique existant s'il y en a un
+            if (chartRepartition) {
+                chartRepartition.destroy();
+            }
+            
+            chartRepartition = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Jeunes (0-24 ans)', 'Adultes (25-64 ans)', 'Seniors (65+ ans)'],
+                    datasets: [{
+                        data: [
+                            repartitionData.jeunes.nombre,
+                            repartitionData.adultes.nombre,
+                            repartitionData.seniors.nombre
+                        ],
+                        backgroundColor: [
+                            'rgba(59, 130, 246, 0.8)',
+                            'rgba(34, 197, 94, 0.8)',
+                            'rgba(147, 51, 234, 0.8)'
+                        ],
+                        borderColor: [
+                            'rgba(59, 130, 246, 1)',
+                            'rgba(34, 197, 94, 1)',
+                            'rgba(147, 51, 234, 1)'
+                        ],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const total = repartitionData.jeunes.nombre + repartitionData.adultes.nombre + repartitionData.seniors.nombre;
+                                    const percentage = ((context.parsed / total) * 100).toFixed(1);
+                                    return `${context.label}: ${context.parsed.toLocaleString('fr-FR')} (${percentage}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html> 
